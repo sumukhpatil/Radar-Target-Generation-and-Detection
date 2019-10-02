@@ -14,7 +14,8 @@ clc;
 % *%TODO* :
 % define the target's initial position and velocity. Note : Velocity
 % remains contant
- 
+initial_range = 100;
+initial_vel = 50;
 
 
 %% FMCW Waveform Generation
@@ -23,8 +24,13 @@ clc;
 %Design the FMCW waveform by giving the specs of each of its parameters.
 % Calculate the Bandwidth (B), Chirp Time (Tchirp) and Slope (slope) of the FMCW
 % chirp using the requirements above.
-c = 3*e8;
-B = c/(2*
+c = 3e8;
+rangeResolution = 1;
+range_max = 200;
+B = c/(2*rangeResolution);
+Tchirp = 5.5*2*(range_max/c);
+
+slope = B/Tchirp;
 
 %Operating carrier frequency of Radar 
 fc= 77e9;             %carrier freq
@@ -64,14 +70,14 @@ for i=1:length(t)
     % *%TODO* :
     %For each time sample we need update the transmitted and
     %received signal. 
-    Tx(i) = 
-    Rx(i)  =
+    Tx(i) = cos(2*pi*(fc*i + slope*(i^2/2)));
+    Rx(i) = cos(2*pi*(fc*(i - td) + slope*(i - ^2/2)));
     
     % *%TODO* :
     %Now by mixing the Transmit and Receive generate the beat signal
     %This is done by element wise matrix multiplication of Transmit and
     %Receiver Signal
-    Mix(i) = 
+%     Mix(i) = 
     
 end
 
