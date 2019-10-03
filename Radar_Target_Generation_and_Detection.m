@@ -66,7 +66,8 @@ for i=1:length(t)
     
     % *%TODO* :
     %For each time stamp update the Range of the Target for constant velocity. 
-    
+    r_t(i) = initial_range + (initial_vel*t(i));
+    td = r_t(i)/c;
     % *%TODO* :
     %For each time sample we need update the transmitted and
     %received signal. 
@@ -87,18 +88,19 @@ end
  % *%TODO* :
 %reshape the vector into Nr*Nd array. Nr and Nd here would also define the size of
 %Range and Doppler FFT respectively.
-
+Mix = reshape(Mix,[Nr, Nd]);
  % *%TODO* :
 %run the FFT on the beat signal along the range bins dimension (Nr) and
 %normalize.
-
+signal_fft = fft(Mix, Nr)/Nr;
+signal_fft = signal_fft./Nr;
  % *%TODO* :
 % Take the absolute value of FFT output
-
+signal_fft = abs(signal_fft);
  % *%TODO* :
 % Output of FFT is double sided signal, but we are interested in only one side of the spectrum.
 % Hence we throw out half of the samples.
-
+signal_fft_single_side = signal_fft(1:Nr/2);
 
 %plotting the range
 figure ('Name','Range from First FFT')
@@ -106,7 +108,7 @@ subplot(2,1,1)
 
  % *%TODO* :
  % plot FFT output 
-
+plot(singal_fft_single_side);
  
 axis ([0 200 0 1]);
 
