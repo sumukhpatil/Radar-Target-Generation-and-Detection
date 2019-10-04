@@ -150,18 +150,25 @@ figure,surf(doppler_axis,range_axis,RDM);
 
 % *%TODO* :
 %Select the number of Training Cells in both the dimensions.
+Tr = 15;
+Td = 4;
 
 % *%TODO* :
 %Select the number of Guard Cells in both dimensions around the Cell under 
 %test (CUT) for accurate estimation
+Gr = 4;
+Gd = 1;
 
 % *%TODO* :
 % offset the threshold by SNR value in dB
+offset = 10;
 
 % *%TODO* :
 %Create a vector to store noise_level for each iteration on training cells
 noise_level = zeros(1,1);
 
+total_guard = (2*Gr+1)*(2*Gd+1) - 1;
+total_training = (2*Tr+2*Gr+1)*(2*Td+2*Gd+1) - (total_guard + 1);
 
 % *%TODO* :
 %design a loop such that it slides the CUT across range doppler map by
@@ -177,10 +184,30 @@ noise_level = zeros(1,1);
 
    % Use RDM[x,y] as the matrix from the output of 2D FFT for implementing
    % CFAR
-
-
-
-
+   CFAR = zeros(size(RDM));
+for i = Tr+Gr+1:(Nr/2)-(Tr+Gr)
+    for j = Td+Gd+1:Nd-(Td+Gd)
+        noise_level = zeros(1, 1);
+        
+        for k = i-(Tr+Gr):i+(Tr+Gr)
+            for l = j-(Td+Gd):j+(Td+Gd)
+                if (abs(i-k) > Gr || abs(j-l) < Gd)
+                    % convert to pow to calculate noise level
+                    noise_level = noise_level + db2pow(RDM(k,l));
+                end
+            end
+        end
+        % calculate to db to add offset
+        threshold = pow2db(noise_level/(2*(Td+Gd+1)*2*(Tr+Gr+1)-(Gr+Gd)-1));
+        threshold = threshold + offset;
+        
+        if (RDM(i, j) > threshold)
+            CFAR(i,j) = 1;
+        else
+            CFAR(i,j) = 0;
+        end
+    end
+end
 
 % *%TODO* :
 % The process above will generate a thresholded block, which is smaller 
@@ -188,20 +215,11 @@ noise_level = zeros(1,1);
 %matrix. Hence,few cells will not be thresholded. To keep the map size same
 % set those values to 0. 
  
-
-
-
-
-
-
-
+CFAR(union(1:(Tr+Gr),end-(Tr+Gr-1):end), :) = 0;
+CFAR(:, union(1:(Td+Gd),end-(Td+Gd-1):end)) = 0;
 
 % *%TODO* :
 %display the CFAR output using the Surf function like we did for Range
 %Doppler Response output.
-figure,surf(doppler_axis,range_axis,'replace this with output');
+figure,surf(doppler_axis,range_axis,CFAR);
 colorbar;
-
-
- 
- 
